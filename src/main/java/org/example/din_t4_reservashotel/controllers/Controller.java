@@ -1,11 +1,17 @@
 package org.example.din_t4_reservashotel.controllers;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import com.google.gson.Gson;
+import org.example.din_t4_reservashotel.model.Reserva;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Controller {
 
@@ -98,17 +104,45 @@ public class Controller {
     //botón Aceptar
     @FXML
     private void handleAceptar() {
+        //Obtener los datos de los campos
+        String dni = tfDni.getText();
+        String nombre = tfNombre.getText();
+        String direccion = tfDireccion.getText();
+        String localidad = tfLocalidad.getText();
+        String provincia = tfProvincia.getText();
+        String fechaLlegada = dpFechaLlegada.getValue().toString();
+        String fechaSalida = dpFechaSalida.getValue().toString();
+        int numHabitacion = spinnerNumHabitacion.getValue();
+        String tipoHabitacion = cboxTipoHabitacion.getValue();
+        boolean esFumador = checkboxFumador.isSelected();
+        String regimenAlojamiento = rbAlojamientoDesayuno.isSelected() ? "Alojamiento y desayuno" :
+                (rbMediaPension.isSelected() ? "Media pensión" : "Pensión completa");
 
-        System.out.println("Reserva confirmada para: " + tfNombre.getText());
+        //Crear un objeto Reserva con los datos
+        Reserva reserva = new Reserva(dni, nombre, direccion, localidad, provincia, fechaLlegada, fechaSalida, numHabitacion,
+                tipoHabitacion, esFumador, regimenAlojamiento);
+
+        //Crear el objeto Gson para convertir el objeto a JSON
+        Gson gson = new Gson();
+
+        //Convertir el objeto Reserva a JSON
+        String json = gson.toJson(reserva);
+
+        //Guardar el JSON en un archivo
+        try (FileWriter writer = new FileWriter("reserva.json")) {
+            writer.write(json);  // Escribe el JSON en el archivo
+            System.out.println("Reserva guardada en JSON");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     //botón Cancelar
     @FXML
     private void handleCancelar() {
         Stage stage = (Stage) btCancelar.getScene().getWindow();
-        // Cierra la ventana
         System.out.println("Reserva cancelada");
-        stage.close();
+        Platform.exit();
     }
 
     //limpiar los campos
